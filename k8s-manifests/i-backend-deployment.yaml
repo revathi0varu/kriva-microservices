@@ -1,0 +1,68 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: i-app-deployment
+  namespace: i-prod # Targets your isolated production playground
+  labels:
+    app: i-backend
+    environment: production
+spec:
+  replicas: 3 # Spreads 3 instances across your t3.medium nodes for high availability
+  selector:
+    matchLabels:
+      app: i-backend
+  template:
+    metadata:
+      labels:
+        app: i-backend
+    spec:
+      serviceAccountName: i-service-account
+      containers:
+        - name: i-app
+          image: <YOUR_AWS_ACCOUNT_ID>.dkr.ecr.us-east-1.amazonaws.com/i-repo:latest # Your multi-stage Docker image
+          ports:
+            - containerPort: 8080 # Matches your Spring Boot listening port
+          
+          # Environment variables your Java code reads to connect to PostgreSQL
+          env:
+            - name: DB_HOST
+              value: "kriva-rds-sg" # Or your exact RDS endpoint string
+            - name: DB_USER
+              valueFrom:
+                secretKeyRef:
+                  name: i-db-k8s-secret
+                  key: username
+            - name: DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: i-db-k8s-secret
+                  key: password
+
+          # Health checks to make sure the app is running smoothly
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 8080
+            initialDelaySeconds: 30
+            periodSeconds: 10
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 8080
+            initialDelaySeconds: 30
+            periodSeconds: 10
+
+          # Mounts the secret provider volume so the driver syncs the credentials
+          volumeMounts:
+            - name: secrets-store-inline
+              mountPath: "/mnt/secrets-store"
+              readOnly: true
+
+      # The volume configuration linking back to our secret-provider.yaml
+      volumes:
+        - name: secrets-store-inline
+          csi:
+            driver: secrets-store.csi.k8s.io
+            readOnly: true
+            volumeAttributes:
+              secretProviderClass: "i-db-secret-provider"

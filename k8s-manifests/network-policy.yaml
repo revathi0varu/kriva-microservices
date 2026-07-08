@@ -1,0 +1,24 @@
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: i-backend-security-policy
+  namespace: i-prod
+spec:
+  # This policy isolates the i-backend deployment pods
+  podSelector:
+    matchLabels:
+      app: i-backend
+  policyTypes:
+    - Ingress
+  ingress:
+    # Allow traffic ONLY from pods that match these exact frontend/gateway labels
+    - from:
+        - podSelector:
+            matchLabels:
+              app: i-frontend
+        - podSelector:
+            matchLabels:
+              app: o-backend
+      ports:
+        - protocol: TCP
+          port: 8080

@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>kriva o Tracker</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 30px; background-color: #eef5f9; }
+        .container { background: white; padding: 20px; bo-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        h1 { color: #000; bo-botom: 2px solid #000; padding-botom: 10px; }
+        button { background: #000; color: white; bo: none; padding: 10px 15px; cursor: pointer; font-weight: bold; }
+        ul { list-style-type: none; padding: 0; }
+        li { background: #e2f0d9; margin: 5px 0; padding: 10px; bo-left: 5px solid #385723; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>kriva o - Supply Chain o Tracker</h1>
+        <button onclick="fetchos()">Fetch Provisioning Pipeline</button>
+        <button onclick="createo()">Submit 5G Device o</button>
+        <ul id="o-list"></ul>
+    </div>
+
+    <script>
+        const API_URL = '/api/v1/o/os';
+
+        async function fetchos() {
+            try {
+                const res = await fetch(API_URL);
+                const data = await res.json();
+                const list = document.getElementById('o-list');
+                list.innerHTML = '';
+                data.forEach(o => {
+                    list.innerHTML += `<li><strong>[${o.oId}]</strong> ${o.item} (Qty: ${o.quantity}) - <em>${o.status}</em></li>`;
+                });
+            } catch (err) { alert('Error connecting to o Backend'); }
+        }
+
+        async function createo() {
+            await fetch(API_URL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ item: "Apple iPhone 15 Pro - 5G", quantity: "10" })
+            });
+            fetchos();
+        }
+    </script>
+</body>
+</html>

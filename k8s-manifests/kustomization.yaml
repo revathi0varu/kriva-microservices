@@ -1,0 +1,16 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+# The exact order of files to bundle together into a unified deployment package
+resources:
+  - prod-namespace.yaml
+  - service-account.yaml
+  - secret-provider.yaml
+  - services.yaml
+  - i-backend-deployment.yaml
+  - o-backend-deployment.yaml
+  - i-frontend-deployment.yaml
+  - o-frontend-deployment.yaml
+  - ingress.yaml
+  - hpa.yaml
+  - network-policy.yaml

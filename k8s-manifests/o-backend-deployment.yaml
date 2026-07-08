@@ -1,0 +1,42 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: o-backend-deployment
+  namespace: i-prod
+  labels:
+    app: o-backend
+    environment: production
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: o-backend
+  template:
+    metadata:
+      labels:
+        app: o-backend
+    spec:
+      containers:
+        - name: o-backend
+          image: <YOUR_AWS_ACCOUNT_ID>.dkr.ecr.us-east-1.amazonaws.com/i-o-backend:latest
+          ports:
+            - containerPort: 8081
+          env:
+            - name: PORT
+              value: "8081"
+            - name: i_BACKEND_URL
+              value: "http://i-backend-service:8080"
+          
+          # Health checks to monitor the o backend service
+          livenessProbe:
+            httpGet:
+              path: /health # Assumes your Node/Python app has a /health endpoint
+              port: 8081
+            initialDelaySeconds: 15
+            periodSeconds: 10
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 8081
+            initialDelaySeconds: 15
+            periodSeconds: 10

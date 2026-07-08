@@ -1,0 +1,57 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: i-backend-service
+  namespace: i-prod
+spec:
+  type: ClusterIP # Internal routing only (pods can talk to it, but no public internet)
+  ports:
+    - port: 8080
+      targetPort: 8080
+  selector:
+    app: i-backend
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: i-frontend-service
+  namespace: i-prod
+spec:
+  type: ClusterIP # Will be exposed to users later via an Ingress / Load Balancer
+  ports:
+    - port: 80
+      targetPort: 3000 # Assuming frontend runs on typical port 3000 (adjust if needed!)
+  selector:
+    app: i-frontend
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: o-backend-service
+  namespace: i-prod
+spec:
+  type: ClusterIP
+  ports:
+    - port: 8081 # Keeping ports distinct if they run on different configurations
+      targetPort: 8081
+  selector:
+    app: o-backend
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: o-frontend-service
+  namespace: i-prod
+spec:
+  type: ClusterIP
+  ports:
+    - port: 80
+      targetPort: 3000
+  selector:
+    app: o-frontend

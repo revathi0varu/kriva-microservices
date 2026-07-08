@@ -1,0 +1,38 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: i-o-ingress
+  namespace: i-prod
+  annotations:
+    # Tells Kubernetes to use the AWS Load Balancer Controller to provision a real AWS ALB
+    kubernetes.io/ingress.class: alb
+    
+    # Configures the ALB to be public (internet-facing) rather than internal-only
+    alb.ingress.kubernetes.io/scheme: internet-facing
+    
+    # Routes traffic over standard HTTP (port 80) for initial setup
+    alb.ingress.kubernetes.io/listen-ports: '[{"HTTP": 80}]'
+    
+    # High-availability target type configuration for EKS Node groups
+    alb.ingress.kubernetes.io/target-type: instance
+spec:
+  rules:
+    - http:
+        paths:
+          # 1. Route for the Core i Frontend
+          - path: /i
+            pathType: Prefix
+            backend:
+              service:
+                name: i-frontend-service
+                port:
+                  number: 80 # Connects to the Port 80 exposed by your services.yaml
+
+          # 2. Route for the O Frontend
+          - path: /o
+            pathType: Prefix
+            backend:
+              service:
+                name: o-frontend-service
+                port:
+                  number: 80

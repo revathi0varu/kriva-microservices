@@ -1,0 +1,37 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: i-frontend-deployment
+  namespace: i-prod
+  labels:
+    app: i-frontend
+    environment: production
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: i-frontend
+  template:
+    metadata:
+      labels:
+        app: i-frontend
+    spec:
+      containers:
+        - name: i-frontend
+          image: <YOUR_AWS_ACCOUNT_ID>.dkr.ecr.us-east-1.amazonaws.com/i-frontend:latest
+          ports:
+            - containerPort: 3000
+          
+          # Health checks to ensure the web server is actively serving the UI
+          livenessProbe:
+            httpGet:
+              path: /  # Checks if the main homepage loads
+              port: 3000
+            initialDelaySeconds: 10
+            periodSeconds: 10
+          readinessProbe:
+            httpGet:
+              path: /
+              port: 3000
+            initialDelaySeconds: 10
+            periodSeconds: 10

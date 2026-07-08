@@ -1,0 +1,24 @@
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: i-o-autoscaler
+  namespace: i-prod
+spec:
+  # The target deployment this scaler will watch (we will scale the heavy-lifting core backend)
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: i-app-deployment
+  
+  # Enterprise boundaries: scale down to 3 minimum at night, up to 10 maximum during peak morning spikes
+  minReplicas: 3
+  maxReplicas: 10
+  
+  metrics:
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          # If average CPU usage across all pods crosses 70%, Kubernetes instantly triggers fresh pods
+          averageUtilization: 70

@@ -1,0 +1,37 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: o-frontend-deployment
+  namespace: i-prod
+  labels:
+    app: o-frontend
+    environment: production
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: o-frontend
+  template:
+    metadata:
+      labels:
+        app: o-frontend
+    spec:
+      containers:
+        - name: o-frontend
+          image: <YOUR_AWS_ACCOUNT_ID>.dkr.ecr.us-east-1.amazonaws.com/o-frontend:latest
+          ports:
+            - containerPort: 3000
+
+          # Health checks to ensure the field technician UI is accessible
+          livenessProbe:
+            httpGet:
+              path: /
+              port: 3000
+            initialDelaySeconds: 10
+            periodSeconds: 10
+          readinessProbe:
+            httpGet:
+              path: /
+              port: 3000
+            initialDelaySeconds: 10
+            periodSeconds: 10
